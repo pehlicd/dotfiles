@@ -117,12 +117,9 @@ noto-fonts-emoji
 otf-font-awesome
 ttf-cascadia-mono-nerd
 yaru-icon-theme
-plymouth-themes-adi1090x-git
+plymouth
 sddm
-sddm-theme-sugar-candy-git
-qt5-graphicaleffects
-qt5-quickcontrols2
-qt5-svg
+cantarell-fonts
 
 # Applications
 localsend-bin

@@ -1,0 +1,11 @@
+[Plymouth Theme]
+Name=Dotfiles
+Description=Custom boot splash for dotfiles setup.
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/dotfiles
+ScriptFile=/usr/share/plymouth/themes/dotfiles/dotfiles.script
+ConsoleLogBackgroundColor=0x1a1b26
+MonospaceFont=Cantarell 11
+Font=Cantarell 11

@@ -1,0 +1,6 @@
+[SddmGreeterTheme]
+Name=Dotfiles
+Description=Minimal terminal-style login theme
+Author=Dotfiles
+Type=sddm-theme
+Version=1.0
