@@ -38,6 +38,9 @@ reload_apps() {
     gsettings set org.gnome.desktop.interface icon-theme "$(<"$gnome_icons_theme")"
   fi
 
+  # Generate Chrome/Chromium theme
+  generate-chrome-theme 2>/dev/null &
+
   log_success "Applications reloaded"
 }
 

@@ -1,0 +1,139 @@
+#!/bin/bash
+# Generate a Chrome/Chromium theme from the current system theme colors.
+# Creates a Chrome extension-style theme in ~/.config/chromium-theme
+# and installs it for both Chrome and Chromium.
+
+source "$HOME/.local/share/dotfiles/bin/lib/helpers.sh"
+
+THEME_DIR="$HOME/.local/share/dotfiles/current/theme"
+CHROME_THEME_DIR="$HOME/.config/chromium-theme"
+
+hex_to_rgb_array() {
+  local hex="${1#\#}"
+  local r=$((16#${hex:0:2}))
+  local g=$((16#${hex:2:2}))
+  local b=$((16#${hex:4:2}))
+  echo "$r, $g, $b"
+}
+
+darken_hex() {
+  local hex="${1#\#}"
+  local factor="${2:-0.8}"
+  local r=$((16#${hex:0:2}))
+  local g=$((16#${hex:2:2}))
+  local b=$((16#${hex:4:2}))
+  r=$(printf "%.0f" "$(echo "$r * $factor" | bc)")
+  g=$(printf "%.0f" "$(echo "$g * $factor" | bc)")
+  b=$(printf "%.0f" "$(echo "$b * $factor" | bc)")
+  echo "$r, $g, $b"
+}
+
+lighten_hex() {
+  local hex="${1#\#}"
+  local factor="${2:-1.2}"
+  local r=$((16#${hex:0:2}))
+  local g=$((16#${hex:2:2}))
+  local b=$((16#${hex:4:2}))
+  r=$(printf "%.0f" "$(echo "if ($r * $factor > 255) 255 else $r * $factor" | bc)")
+  g=$(printf "%.0f" "$(echo "if ($g * $factor > 255) 255 else $g * $factor" | bc)")
+  b=$(printf "%.0f" "$(echo "if ($b * $factor > 255) 255 else $b * $factor" | bc)")
+  echo "$r, $g, $b"
+}
+
+# Extract colors from the current theme's waybar.css
+extract_colors() {
+  local waybar_css="$THEME_DIR/waybar.css"
+
+  if [[ ! -f "$waybar_css" ]]; then
+    echo "Error: No active theme found at $waybar_css" >&2
+    return 1
+  fi
+
+  BG_HEX=$(grep '@define-color background' "$waybar_css" | head -1 | grep -oP '#[0-9a-fA-F]{6}')
+  FG_HEX=$(grep '@define-color foreground' "$waybar_css" | head -1 | grep -oP '#[0-9a-fA-F]{6}')
+
+  if [[ -z "$BG_HEX" || -z "$FG_HEX" ]]; then
+    echo "Error: Could not extract colors from $waybar_css" >&2
+    return 1
+  fi
+}
+
+generate_theme() {
+  extract_colors || return 1
+
+  local bg_rgb=$(hex_to_rgb_array "$BG_HEX")
+  local fg_rgb=$(hex_to_rgb_array "$FG_HEX")
+  local frame_rgb=$(darken_hex "$BG_HEX" 0.7)
+  local toolbar_rgb=$(lighten_hex "$BG_HEX" 1.15)
+  local tab_bg_rgb=$(darken_hex "$BG_HEX" 0.85)
+
+  # Get theme name for display
+  local theme_name="System Theme"
+  if [[ -L "$THEME_DIR" ]]; then
+    theme_name=$(basename "$(readlink "$THEME_DIR")")
+  fi
+
+  mkdir -p "$CHROME_THEME_DIR"
+
+  cat > "$CHROME_THEME_DIR/manifest.json" << EOF
+{
+  "manifest_version": 3,
+  "version": "1.0",
+  "name": "Dotfiles - ${theme_name^}",
+  "description": "Auto-generated theme from ${theme_name} system theme",
+  "theme": {
+    "colors": {
+      "frame":                    [$frame_rgb],
+      "frame_inactive":           [$frame_rgb],
+      "frame_incognito":          [$frame_rgb],
+      "frame_incognito_inactive": [$frame_rgb],
+      "toolbar":                  [$toolbar_rgb],
+      "tab_background_inactive":  [$tab_bg_rgb],
+      "tab_text":                 [$fg_rgb],
+      "bookmark_text":            [$fg_rgb],
+      "tab_background_text_inactive": [$fg_rgb],
+      "ntp_background":           [$bg_rgb],
+      "ntp_text":                 [$fg_rgb],
+      "ntp_header":               [$frame_rgb],
+      "omnibox_background":       [$bg_rgb],
+      "omnibox_text":             [$fg_rgb],
+      "toolbar_button_icon":      [$fg_rgb],
+      "button_background":        [$bg_rgb]
+    },
+    "tints": {
+      "buttons": [0.0, 0.0, 0.7]
+    }
+  }
+}
+EOF
+
+  log_success "Chrome theme generated: $CHROME_THEME_DIR"
+
+  # Install for Chromium (default profile)
+  install_theme "$HOME/.config/chromium"
+  install_theme "$HOME/.config/google-chrome"
+  install_theme "$HOME/.config/google-chrome-beta"
+  install_theme "$HOME/.config/brave"
+}
+
+install_theme() {
+  local browser_dir="$1"
+
+  # Look for any profile directory (Default, Profile 1, etc.)
+  if [[ ! -d "$browser_dir" ]]; then
+    return
+  fi
+
+  for profile_dir in "$browser_dir"/Default "$browser_dir"/Profile\ *; do
+    if [[ -d "$profile_dir" ]]; then
+      local ext_dir="$profile_dir/Extensions/dotfiles_theme"
+      mkdir -p "$ext_dir/1.0"
+      cp "$CHROME_THEME_DIR/manifest.json" "$ext_dir/1.0/manifest.json"
+
+      local browser_name=$(basename "$browser_dir")
+      log_detail "Installed in $browser_name/$(basename "$profile_dir")"
+    fi
+  done
+}
+
+generate_theme

@@ -29,6 +29,9 @@ fi
 # Kill xdg-desktop-portal-gtk so it picks up new theme
 killall xdg-desktop-portal-gtk 2>/dev/null
 
+# Regenerate Chrome/Chromium theme
+generate-chrome-theme 2>/dev/null &
+
 # ── Restore wallpaper ────────────────────────────────────────────────────
 
 # Wait for hyprpaper to be ready (max 5 seconds)
