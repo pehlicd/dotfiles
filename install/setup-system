@@ -115,22 +115,30 @@ if is_installed "sddm"; then
   # Enable SDDM
   sudo systemctl enable sddm
   
-  # Set Sugar Candy theme and background
-  sudo mkdir -p /etc/sddm.conf.d
-  cat <<EOF | sudo tee /etc/sddm.conf.d/theme.conf >/dev/null
+  # Check if sugar-candy theme is actually installed correctly
+  if [ -d "/usr/share/sddm/themes/sugar-candy" ] && [ -f "/usr/share/sddm/themes/sugar-candy/metadata.desktop" ]; then
+    sudo mkdir -p /etc/sddm.conf.d
+    cat <<EOF | sudo tee /etc/sddm.conf.d/theme.conf >/dev/null
 [Theme]
 Current=sugar-candy
 EOF
 
-  # Prepare system-wide wallpaper directory
-  sudo mkdir -p /usr/share/backgrounds/dotfiles
-  sudo chown "$USER:$USER" /usr/share/backgrounds/dotfiles
-  # We'll point SDDM to a symlink that theme-set maintains
-  sudo mkdir -p /usr/share/sddm/themes/sugar-candy
-  sudo sed -i 's|^Background=.*|Background="/usr/share/backgrounds/dotfiles/current_wallpaper.png"|' /usr/share/sddm/themes/sugar-candy/theme.conf.user || \
-  echo 'Background="/usr/share/backgrounds/dotfiles/current_wallpaper.png"' | sudo tee /usr/share/sddm/themes/sugar-candy/theme.conf.user >/dev/null
-
-  log_success "SDDM configured with synced background"
+    # Prepare system-wide wallpaper directory
+    sudo mkdir -p /usr/share/backgrounds/dotfiles
+    sudo chown "$USER:$USER" /usr/share/backgrounds/dotfiles
+    
+    # We'll point SDDM to an absolute path for the background
+    # Most modern SDDM themes (including sugar-candy) support absolute paths
+    cat <<EOF | sudo tee /usr/share/sddm/themes/sugar-candy/theme.conf.user >/dev/null
+[General]
+Background="/usr/share/backgrounds/dotfiles/current_wallpaper.png"
+DimBackgroundImage=0.0
+ScaleImageCropped=true
+EOF
+    log_success "SDDM configured with synced background"
+  else
+    log_error "SDDM theme 'sugar-candy' directory is missing or invalid. Please ensure sddm-theme-sugar-candy-git is installed."
+  fi
 fi
 
 # Plymouth configuration
