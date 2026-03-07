@@ -160,10 +160,16 @@ if is_installed "plymouth"; then
     fi
   fi
   
-  # Set default theme to vortex-git
-  sudo plymouth-set-default-theme -R vortex
+  # Set default theme (we'll look for a few premium ones from the adi1090x pack)
+  if [ -d "/usr/share/plymouth/themes/vortex" ]; then
+    sudo plymouth-set-default-theme -R vortex
+  elif [ -d "/usr/share/plymouth/themes/abstract_ring" ]; then
+    sudo plymouth-set-default-theme -R abstract_ring
+  else
+    sudo plymouth-set-default-theme -R spinner
+  fi
   
-  log_success "Plymouth (Vortex) configured"
+  log_success "Plymouth configured"
 fi
 
 # Remove wait on network from system startup
