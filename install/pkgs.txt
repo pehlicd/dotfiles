@@ -20,6 +20,7 @@ ripgrep
 starship
 zoxide
 zsh
+tmux
 
 # Development
 git
