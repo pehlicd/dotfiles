@@ -98,6 +98,11 @@ if [ -z "$CURRENT_GIT_EMAIL" ]; then
   fi
 fi
 
+# Network configuration
+log_info "Enabling NetworkManager..."
+sudo systemctl enable NetworkManager
+log_success "NetworkManager enabled"
+
 # ly display manager configuration
 if is_installed "ly"; then
   log_info "Configuring ly display manager..."
