@@ -85,7 +85,6 @@ gst-plugins-ugly
 pamixer
 pipewire
 pipewire-alsa
-pipewire-pulse
 wiremix
 wireplumber
 
