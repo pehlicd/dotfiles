@@ -64,6 +64,14 @@ _installPackages() {
       continue
     fi
 
+    # Handle pipewire-pulse vs pulseaudio conflict
+    if [[ "$pkg" == "pipewire-pulse" ]]; then
+      if is_installed "pulseaudio"; then
+        log_info "Removing pulseaudio to make room for pipewire-pulse..."
+        sudo pacman -Rns --noconfirm pulseaudio pulseaudio-alsa pulseaudio-bluetooth 2>/dev/null || true
+      fi
+    fi
+
     # Try to install, handle conflicts gracefully
     if spinner "Installing $pkg... [$current/$total]" yay --noconfirm --needed -S "${pkg}" 2>&1; then
       log_success "$pkg"
