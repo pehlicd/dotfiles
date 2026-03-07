@@ -1,0 +1,28 @@
+#!/bin/bash
+# Restore the last-used wallpaper on login via hyprpaper IPC
+# This waits for hyprpaper to start, then applies the saved background.
+
+CURRENT_BG="$HOME/.local/share/dotfiles/current/background"
+
+# Wait for hyprpaper to be ready (max 5 seconds)
+for i in $(seq 1 10); do
+  if pgrep -x hyprpaper &>/dev/null; then
+    break
+  fi
+  sleep 0.5
+done
+
+# Resolve the symlink to the actual wallpaper path
+if [ -L "$CURRENT_BG" ] && [ -e "$CURRENT_BG" ]; then
+  WALLPAPER=$(readlink -f "$CURRENT_BG")
+
+  # Small delay to let hyprpaper finish initializing IPC
+  sleep 1
+
+  # Apply via IPC to all monitors
+  hyprctl hyprpaper preload "$WALLPAPER"
+  hyprctl monitors -j | jq -r '.[].name' | while read -r monitor; do
+    hyprctl hyprpaper wallpaper "$monitor,$WALLPAPER"
+  done
+  hyprctl hyprpaper unload unused
+fi
