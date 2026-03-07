@@ -39,7 +39,7 @@ function GetEntries()
 					Value = display_name,
 					state = is_current and { "current" } or nil,
 					Actions = {
-						apply = "theme-set '" .. display_name .. "'",
+						activate = "theme-set '" .. display_name .. "'",
 					},
 				})
 			end

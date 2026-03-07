@@ -11,7 +11,7 @@ function GetEntries()
 			Text = "Lock",
 			Icon = "",
 			Actions = {
-				["lock"] = "pidof hyprlock || hyprlock &",
+				["lock"] = "pidof hyprlock || lock-screen &",
 			},
 		},
 		{
