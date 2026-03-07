@@ -6,7 +6,6 @@
     "include": [
         "~/.config/waybar/modules.json"
     ],
-
     "hyprland/workspaces": {
         "format": "{icon}",
         "format-icons": {
@@ -15,14 +14,19 @@
             "empty": ""
         },
         "persistent-workspaces": {
-            "*": [ 1,2,3,4,5 ]
+            "*": [
+                1,
+                2,
+                3,
+                4,
+                5
+            ]
         }
     },
     "custom/expand": {
         "format": "",
         "tooltip": false
     },
-
     "group/expand": {
         "orientation": "horizontal",
         "drawer": {
@@ -30,20 +34,21 @@
             "transition-to-left": true,
             "click-to-reveal": true
         },
-        "modules": ["custom/expand", "custom/filemanager"],
+        "modules": [
+            "custom/expand",
+            "custom/filemanager"
+        ],
     },
-
     // Modules Left
     "modules-left": [
         "clock",
         "group/expand",
     ],
-
     // Modules Center
     "modules-center": [
+        "custom/music",
         "hyprland/workspaces"
     ],
-
     // Modules Right
     "modules-right": [
         "custom/screenrecord",
@@ -53,6 +58,6 @@
         "bluetooth",
         "cpu",
         "battery",
-        "custom/hypridle",
+        "custom/hypridle"
     ]
 }

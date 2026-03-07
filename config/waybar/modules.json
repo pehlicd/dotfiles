@@ -35,13 +35,17 @@
     "on-click": "hypridle-toggle toggle"
   },
   "custom/music": {
-    "format": "  {}",
+    "format": "{}",
     "escape": true,
-    "interval": 5,
+    "interval": 3,
     "tooltip": false,
-    "exec": "playerctl metadata --format='{{ title }} - {{artist}}'",
+    "exec": "playerctl metadata --format '  {{ title }} — {{ artist }}' 2>/dev/null || echo ''",
+    "exec-if": "playerctl status 2>/dev/null | grep -q Playing",
     "on-click": "playerctl play-pause",
-    "max-length": 50
+    "on-click-right": "playerctl stop",
+    "on-scroll-up": "playerctl next",
+    "on-scroll-down": "playerctl previous",
+    "max-length": 40
   },
   "clock": {
     "format": "{:%A %H:%M}",

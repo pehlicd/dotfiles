@@ -87,6 +87,7 @@ pipewire
 pipewire-alsa
 wiremix
 wireplumber
+playerctl
 
 # Bluetooth & Network
 bluez
