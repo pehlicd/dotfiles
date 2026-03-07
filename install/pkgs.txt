@@ -117,7 +117,7 @@ noto-fonts-emoji
 otf-font-awesome
 ttf-cascadia-mono-nerd
 yaru-icon-theme
-plymouth
+plymouth-theme-vortex-git
 sddm
 sddm-theme-sugar-candy-git
 qt5-graphicaleffects
