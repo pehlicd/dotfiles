@@ -4,6 +4,32 @@ source "$HOME/.local/share/dotfiles/bin/lib/helpers.sh"
 clear
 log_header "Updates"
 
+# Show available updates first
+if command -v pacman &>/dev/null; then
+  log_step "Checking for available updates..."
+  UPDATES=$(yay -Qu 2>/dev/null)
+  if [[ -n "$UPDATES" ]]; then
+    UPDATE_COUNT=$(echo "$UPDATES" | wc -l)
+    log_info "$UPDATE_COUNT package(s) to update:"
+    echo "$UPDATES" | head -20
+    if [[ $UPDATE_COUNT -gt 20 ]]; then
+      echo "  ... and $((UPDATE_COUNT - 20)) more"
+    fi
+  else
+    log_info "All packages are up to date"
+  fi
+  echo
+fi
+
+if command -v flatpak &>/dev/null; then
+  FLATPAK_UPDATES=$(flatpak remote-ls --updates 2>/dev/null)
+  if [[ -n "$FLATPAK_UPDATES" ]]; then
+    FLATPAK_COUNT=$(echo "$FLATPAK_UPDATES" | wc -l)
+    log_info "$FLATPAK_COUNT flatpak update(s) available"
+  fi
+fi
+echo
+
 if ask_yes_no "Update now?"; then
   log_step "Update started..."
 elif [ $? -eq 130 ]; then
