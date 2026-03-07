@@ -29,8 +29,8 @@ neovim
 visual-studio-code-bin
 
 # Browsers
-helium-browser-bin
-zen-browser-bin
+chromium
+google-chrome
 
 # Hyprland
 hyprcursor
@@ -85,6 +85,7 @@ bluez
 bluez-libs
 bluez-utils
 bluetui
+networkmanager
 
 # File Management & Desktop
 gvfs-dnssd
