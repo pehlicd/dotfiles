@@ -1,0 +1,55 @@
+#!/bin/bash
+# Restore the last-used wallpaper and theme on login.
+# Called via exec-once in autostart.conf.
+
+DOTFILES_DIR="$HOME/.local/share/dotfiles"
+CURRENT_BG="$DOTFILES_DIR/current/background"
+CURRENT_THEME="$DOTFILES_DIR/current/theme"
+
+# ── Restore theme settings ──────────────────────────────────────────────
+
+# Re-apply icon theme from saved setting
+ICONS_FILE="$CURRENT_THEME/icons.theme"
+if [ -f "$ICONS_FILE" ]; then
+  gsettings set org.gnome.desktop.interface icon-theme "$(< "$ICONS_FILE")"
+fi
+
+# Re-apply cursor theme if set
+CURSOR_FILE="$CURRENT_THEME/cursor.theme"
+if [ -f "$CURSOR_FILE" ]; then
+  gsettings set org.gnome.desktop.interface cursor-theme "$(< "$CURSOR_FILE")"
+fi
+
+# Re-apply GTK theme if set
+GTK_FILE="$CURRENT_THEME/gtk.theme"
+if [ -f "$GTK_FILE" ]; then
+  gsettings set org.gnome.desktop.interface gtk-theme "$(< "$GTK_FILE")"
+fi
+
+# Kill xdg-desktop-portal-gtk so it picks up new theme
+killall xdg-desktop-portal-gtk 2>/dev/null
+
+# ── Restore wallpaper ────────────────────────────────────────────────────
+
+# Wait for hyprpaper to be ready (max 5 seconds)
+for i in $(seq 1 10); do
+  if pgrep -x hyprpaper &>/dev/null; then
+    break
+  fi
+  sleep 0.5
+done
+
+# Resolve the symlink to the actual wallpaper path
+if [ -L "$CURRENT_BG" ] && [ -e "$CURRENT_BG" ]; then
+  WALLPAPER=$(readlink -f "$CURRENT_BG")
+
+  # Small delay to let hyprpaper finish initializing IPC
+  sleep 1
+
+  # Apply via IPC to all monitors
+  hyprctl hyprpaper preload "$WALLPAPER"
+  hyprctl monitors -j | jq -r '.[].name' | while read -r monitor; do
+    hyprctl hyprpaper wallpaper "$monitor,$WALLPAPER"
+  done
+  hyprctl hyprpaper unload unused
+fi
