@@ -4,17 +4,7 @@ HideFromProviderlist = true
 Cache = false
 
 function SetWallpaper(value)
-	os.execute("rm -rf ~/.local/share/dotfiles/current/background && ln -s '" .. value .. "' ~/.local/share/dotfiles/current/background")
-
-	local monitors_handle = io.popen("hyprctl monitors -j | jq -r '.[].name'")
-	if monitors_handle then
-		for monitor in monitors_handle:lines() do
-			os.execute("hyprctl hyprpaper preload '" .. value .. "'")
-			os.execute("hyprctl hyprpaper wallpaper '" .. monitor .. "," .. value .. "'")
-		end
-		monitors_handle:close()
-	end
-	os.execute("hyprctl hyprpaper unload unused")
+	os.execute("theme-set --wallpaper '" .. value .. "' &")
 end
 
 function ScanDir(dir, label, entries)
