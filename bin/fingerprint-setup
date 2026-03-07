@@ -1,15 +1,20 @@
 #!/bin/bash
 
-set -e
-
 # Source helper library
 source "$HOME/.local/share/dotfiles/bin/lib/helpers.sh"
 
 # --- Hardware Checks ---
 
 check_fingerprint_hardware() {
+  if ! command -v lsusb &>/dev/null; then
+    log_info "lsusb not found, installing usbutils..."
+    sudo pacman -S --noconfirm --needed usbutils >/dev/null 2>&1 || true
+  fi
+
   if ! lsusb | grep -Eiq 'fingerprint|synaptics|goodix|elan|validity|FPC'; then
     log_error "No fingerprint sensor detected via lsusb."
+    echo
+    read -p "  Press Enter to exit..."
     return 1
   fi
   return 0
@@ -22,6 +27,8 @@ ensure_packages() {
             log_success "Packages installed"
         else
             log_error "Failed to install packages"
+            echo
+            read -p "  Press Enter to continue..."
             return 1
         fi
     fi
@@ -133,6 +140,8 @@ action_enroll_finger() {
         fi
     else
         log_error "Enrollment failed or cancelled."
+        echo
+        read -p "  Press Enter to continue..."
     fi
 }
 
