@@ -7,7 +7,7 @@ CURRENT_BACKGROUND_LINK="$HOME/.local/share/dotfiles/current/background"
 
 set_wallpaper() {
   local wallpaper="$1"
-  ln -nsf "$wallpaper" "$CURRENT_BACKGROUND_LINK"
+  safe_symlink "$wallpaper" "$CURRENT_BACKGROUND_LINK"
 
   hyprctl monitors -j | jq -r '.[].name' | while read -r monitor; do
     hyprctl hyprpaper reload "$monitor,$CURRENT_BACKGROUND_LINK"
@@ -39,7 +39,7 @@ apply_dynamic_theme() {
 
   log_step "Applying ${theme_name^} theme"
 
-  ln -nsf "$THEMES_DIR/$theme_name" "$CURRENT_THEME_LINK"
+  safe_symlink "$THEMES_DIR/$theme_name" "$CURRENT_THEME_LINK"
 
   if [[ -n "$wallpaper" ]]; then
     set_wallpaper "$wallpaper"
@@ -63,7 +63,7 @@ switch_theme() {
 
   log_step "Switching to theme: $theme_name"
 
-  ln -nsf "$theme_path" "$CURRENT_THEME_LINK"
+  safe_symlink "$theme_path" "$CURRENT_THEME_LINK"
 
   local wallpaper=$(find -L "$theme_path/backgrounds" -type f | sort | head -n 1)
   if [[ -n "$wallpaper" ]]; then

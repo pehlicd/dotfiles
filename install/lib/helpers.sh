@@ -180,3 +180,11 @@ remove_path() {
         rm -rf "$target"
     fi
 }
+
+safe_symlink() {
+    local source="$1"
+    local target="$2"
+    
+    remove_path "$target"
+    ln -s "$source" "$target"
+}

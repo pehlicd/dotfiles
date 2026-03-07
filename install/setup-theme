@@ -9,26 +9,23 @@ DOTFILES_DIR="$HOME/.local/share/dotfiles"
 # Set initial theme
 log_info "Setting up initial theme (everforest)..."
 mkdir -p "$DOTFILES_DIR/current"
-ln -snf "$DOTFILES_DIR/themes/everforest" "$DOTFILES_DIR/current/theme"
-ln -snf "$DOTFILES_DIR/current/theme/backgrounds/1-everforest.jpg" "$DOTFILES_DIR/current/background"
+safe_symlink "$DOTFILES_DIR/themes/everforest" "$DOTFILES_DIR/current/theme"
+safe_symlink "$DOTFILES_DIR/current/theme/backgrounds/1-everforest.jpg" "$DOTFILES_DIR/current/background"
 
 mkdir -p "$HOME/.config/nvim/lua/plugins"
 mkdir -p "$HOME/.config/btop/themes"
 mkdir -p "$HOME/.config/mako"
 
-ln -snf "$DOTFILES_DIR/current/theme/neovim.lua" "$HOME/.config/nvim/lua/plugins/theme.lua"
-ln -snf "$DOTFILES_DIR/current/theme/btop.theme" "$HOME/.config/btop/themes/current.theme"
-ln -snf "$DOTFILES_DIR/current/theme/mako.ini" "$HOME/.config/mako/config"
+safe_symlink "$DOTFILES_DIR/current/theme/neovim.lua" "$HOME/.config/nvim/lua/plugins/theme.lua"
+safe_symlink "$DOTFILES_DIR/current/theme/btop.theme" "$HOME/.config/btop/themes/current.theme"
+safe_symlink "$DOTFILES_DIR/current/theme/mako.ini" "$HOME/.config/mako/config"
 
 mkdir -p "$HOME/.config/fastfetch"
-ln -snf "$DOTFILES_DIR/config/fastfetch/configs/config-default.jsonc" "$HOME/.config/fastfetch/config.jsonc"
+safe_symlink "$DOTFILES_DIR/config/fastfetch/configs/config-default.jsonc" "$HOME/.config/fastfetch/config.jsonc"
 
 log_info "Setting up wallpapers symlink..."
 mkdir -p "$HOME/Pictures"
-if [ -L "$HOME/Pictures/dotfiles-wallpapers" ] || [ -d "$HOME/Pictures/dotfiles-wallpapers" ]; then
-  mv "$HOME/Pictures/dotfiles-wallpapers" "$HOME/Pictures/dotfiles-wallpapers-backup"
-fi
-ln -sf "$DOTFILES_DIR/backgrounds" "$HOME/Pictures/dotfiles-wallpapers"
+safe_symlink "$DOTFILES_DIR/backgrounds" "$HOME/Pictures/dotfiles-wallpapers"
 log_detail "Wallpapers symlinked to ~/Pictures/dotfiles-wallpapers"
 
 gsettings set org.gnome.desktop.interface icon-theme "Yaru-sage"

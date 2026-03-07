@@ -4,7 +4,7 @@ HideFromProviderlist = true
 Cache = false
 
 function SetWallpaper(value)
-	os.execute("ln -nsf '" .. value .. "' ~/.local/share/dotfiles/current/background")
+	os.execute("rm -rf ~/.local/share/dotfiles/current/background && ln -s '" .. value .. "' ~/.local/share/dotfiles/current/background")
 
 	local monitors_handle = io.popen("hyprctl monitors -j | jq -r '.[].name'")
 	if monitors_handle then

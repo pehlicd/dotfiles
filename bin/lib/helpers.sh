@@ -113,3 +113,21 @@ show_done() {
   echo
   gum spin --spinner "dot" --title "Done! Press any key to close..." -- bash -c 'read -n 1 -s'
 }
+
+remove_path() {
+    local target="$1"
+
+    if [ -L "$target" ] && [ ! -e "$target" ]; then
+        rm -f "$target"
+    elif [ -e "$target" ]; then
+        rm -rf "$target"
+    fi
+}
+
+safe_symlink() {
+    local source="$1"
+    local target="$2"
+    
+    remove_path "$target"
+    ln -s "$source" "$target"
+}
