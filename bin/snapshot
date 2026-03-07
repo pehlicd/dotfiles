@@ -1,0 +1,70 @@
+#!/bin/bash
+# Description: Manage system snapshots using Timeshift
+# Usage: snapshot {create [comment]|delete <snapshot>|list|gui|restore <snapshot>}
+
+if ! command -v timeshift &> /dev/null; then
+  echo "Error: Timeshift is not installed. Please install it with: sudo pacman -S timeshift"
+  exit 1
+fi
+
+ACTION="$1"
+shift
+
+case "$ACTION" in
+  create)
+    COMMENT="${1:-Manual Snapshot (CLI/Menu)}"
+    echo "Creating snapshot: $COMMENT..."
+    # pkexec ensures full GUI polkit prompt if run from a menu
+    if [ -n "$WAYLAND_DISPLAY" ]; then
+      pkexec timeshift --create --comments "$COMMENT"
+    else
+      sudo timeshift --create --comments "$COMMENT"
+    fi
+    ;;
+  delete)
+    SNAPSHOT="$1"
+    if [[ -z "$SNAPSHOT" ]]; then
+      echo "Error: Please specify a snapshot name to delete."
+      echo "Example: snapshot delete '2023-10-10_10-10-10'"
+      exit 1
+    fi
+    echo "Deleting snapshot: $SNAPSHOT..."
+    if [ -n "$WAYLAND_DISPLAY" ]; then
+      pkexec timeshift --delete --snapshot "$SNAPSHOT"
+    else
+      sudo timeshift --delete --snapshot "$SNAPSHOT"
+    fi
+    ;;
+  list)
+    sudo timeshift --list
+    ;;
+  restore)
+    SNAPSHOT="$1"
+    if [[ -z "$SNAPSHOT" ]]; then
+      echo "Error: Please specify a snapshot name to restore."
+      exit 1
+    fi
+    # Restoring is best handled interactively/GUI, or CLI via sudo.
+    sudo timeshift --restore --snapshot "$SNAPSHOT"
+    ;;
+  gui)
+    if command -v timeshift-launcher &> /dev/null; then
+      timeshift-launcher &
+    elif command -v timeshift-gtk &> /dev/null; then
+      pkexec timeshift-gtk &
+    else
+      echo "Timeshift GUI not found. Please run 'sudo timeshift' in terminal."
+      exit 1
+    fi
+    ;;
+  *)
+    echo "Usage: snapshot {create [comment]|delete <name>|list|gui|restore <name>}"
+    echo ""
+    echo "Examples:"
+    echo "  snapshot create                    # Creates a snapshot with default comment"
+    echo "  snapshot create \"Before updates\"   # Creates with a specific comment"
+    echo "  snapshot list                      # Lists all snapshots"
+    echo "  snapshot gui                       # Opens Timeshift GUI"
+    exit 1
+    ;;
+esac

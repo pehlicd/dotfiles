@@ -112,6 +112,7 @@ unzip
 pacman-contrib
 plocate
 power-profiles-daemon
+timeshift
 
 # Appearance
 bibata-cursor-theme
