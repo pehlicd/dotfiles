@@ -1,0 +1,32 @@
+#!/bin/bash
+# Switch waybar theme and persist it across reboots.
+# Usage: waybar-theme <theme-name>
+# Available themes are in ~/.config/waybar/themes/
+
+source "$HOME/.local/share/dotfiles/bin/lib/helpers.sh"
+
+WAYBAR_THEMES="$HOME/.config/waybar/themes"
+CURRENT_LINK="$HOME/.config/waybar/current"
+
+if [[ -z "$1" ]]; then
+  echo "Available waybar themes:"
+  for theme in "$WAYBAR_THEMES"/*/; do
+    echo "  - $(basename "$theme")"
+  done
+  echo ""
+  echo "Usage: waybar-theme <theme-name>"
+  exit 0
+fi
+
+THEME_NAME="$1"
+THEME_PATH="$WAYBAR_THEMES/$THEME_NAME"
+
+if [[ ! -d "$THEME_PATH" ]]; then
+  log_error "Waybar theme '$THEME_NAME' not found in $WAYBAR_THEMES/"
+  exit 1
+fi
+
+ln -snf "$THEME_PATH" "$CURRENT_LINK"
+restart-app waybar
+
+log_success "Waybar theme set to: $THEME_NAME"

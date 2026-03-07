@@ -76,3 +76,13 @@ if [ ! -L "$CURRENT_THEME_LINK" ] || [ ! -e "$CURRENT_THEME_LINK" ]; then
     fi
   fi
 fi
+
+# Set default waybar theme if none is set
+WAYBAR_CURRENT="$HOME/.config/waybar/current"
+if [ ! -L "$WAYBAR_CURRENT" ] || [ ! -e "$WAYBAR_CURRENT" ]; then
+  DEFAULT_WAYBAR="$HOME/.config/waybar/themes/omarchy"
+  if [ -d "$DEFAULT_WAYBAR" ]; then
+    ln -snf "$DEFAULT_WAYBAR" "$WAYBAR_CURRENT"
+    log_success "Default waybar theme set: omarchy"
+  fi
+fi

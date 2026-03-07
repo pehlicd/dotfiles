@@ -6,6 +6,7 @@
     "spacing": 0,
     "height": 26,
     "include": [
+        "~/.config/waybar/current/config",
         "~/.config/waybar/modules.json"
     ],
 
