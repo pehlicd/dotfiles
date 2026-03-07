@@ -71,6 +71,15 @@ ffmpeg
 gpu-screen-recorder
 handbrake-cli
 yt-dlp
+mesa
+intel-media-driver
+libva-intel-driver
+libva-mesa-driver
+libva-utils
+gst-libav
+gst-plugins-good
+gst-plugins-bad
+gst-plugins-ugly
 
 # Audio
 pamixer
