@@ -41,6 +41,9 @@ reload_apps() {
   # Generate Chrome/Chromium theme
   generate-chrome-theme 2>/dev/null &
 
+  # Sync VSCode/Cursor/Codium theme
+  set-vscode-theme 2>/dev/null &
+
   log_success "Applications reloaded"
 }
 

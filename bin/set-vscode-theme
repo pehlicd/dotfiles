@@ -1,0 +1,42 @@
+#!/bin/bash
+# Sync system theme to VS Code, VSCodium, and Cursor.
+# Reads vscode.json from the current theme and updates workbench.colorTheme.
+# Based on Omarchy's approach.
+
+VSCODE_THEME="$HOME/.local/share/dotfiles/current/theme/vscode.json"
+
+set_theme() {
+  local editor_cmd="$1"
+  local settings_path="$2"
+
+  command -v "$editor_cmd" &>/dev/null || return 0
+
+  if [[ -f "$VSCODE_THEME" ]]; then
+    local theme_name extension
+    theme_name=$(jq -r '.name' "$VSCODE_THEME")
+    extension=$(jq -r '.extension' "$VSCODE_THEME")
+
+    # Auto-install the extension if not present
+    if [[ -n "$extension" ]] && ! "$editor_cmd" --list-extensions 2>/dev/null | grep -Fxq "$extension"; then
+      "$editor_cmd" --install-extension "$extension" >/dev/null 2>&1
+    fi
+
+    # Ensure settings.json exists
+    mkdir -p "$(dirname "$settings_path")"
+    [[ -f "$settings_path" ]] || printf '{\n}\n' >"$settings_path"
+
+    # Add workbench.colorTheme if missing
+    if ! grep -q '"workbench.colorTheme"' "$settings_path"; then
+      sed -i --follow-symlinks -E '0,/\{/{s/\{/{ "workbench.colorTheme": "",/}' "$settings_path"
+    fi
+
+    # Update the theme name
+    sed -i --follow-symlinks -E \
+      "s/(\"workbench.colorTheme\"[[:space:]]*:[[:space:]]*\")[^\"]*(\")/\1$theme_name\2/" \
+      "$settings_path"
+  fi
+}
+
+set_theme "code"   "$HOME/.config/Code/User/settings.json"
+set_theme "codium" "$HOME/.config/VSCodium/User/settings.json"
+set_theme "cursor" "$HOME/.config/Cursor/User/settings.json"
