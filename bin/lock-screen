@@ -1,0 +1,9 @@
+#!/bin/bash
+# Wrapper around hyprlock that tracks when it exits.
+# Used to prevent system menu from flashing on unlock.
+
+touch /tmp/.hyprlock-active
+hyprlock
+# After hyprlock exits, leave a timestamp so keybindings can detect recent unlock
+date +%s > /tmp/.hyprlock-exit
+rm -f /tmp/.hyprlock-active
