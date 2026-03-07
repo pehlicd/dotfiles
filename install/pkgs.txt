@@ -73,7 +73,11 @@ yt-dlp
 
 # Audio
 pamixer
+pipewire
+pipewire-alsa
+pipewire-pulse
 wiremix
+wireplumber
 
 # Bluetooth & Network
 bluez
