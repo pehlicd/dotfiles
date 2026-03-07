@@ -1,0 +1,21 @@
+#!/bin/bash
+# Refresh Plymouth and SDDM themes from dotfiles source to system directories.
+# Run this after changing any logo, image, or theme file in default/plymouth/ or default/sddm/.
+
+DOTFILES_DIR="$HOME/.local/share/dotfiles"
+
+echo "🔄 Refreshing themes..."
+
+# Refresh Plymouth theme + rebuild initramfs
+echo "  → Copying Plymouth theme to /usr/share/plymouth/themes/dotfiles/..."
+sudo rm -rf /usr/share/plymouth/themes/dotfiles
+sudo cp -r "$DOTFILES_DIR/default/plymouth" /usr/share/plymouth/themes/dotfiles/
+echo "  → Rebuilding initramfs (this embeds the new logo into the boot image)..."
+sudo mkinitcpio -P
+
+# Refresh SDDM theme
+echo "  → Copying SDDM theme to /usr/share/sddm/themes/dotfiles/..."
+sudo rm -rf /usr/share/sddm/themes/dotfiles
+sudo cp -r "$DOTFILES_DIR/default/sddm/dotfiles" /usr/share/sddm/themes/dotfiles/
+
+echo "✅ Done! Reboot to see the changes."
