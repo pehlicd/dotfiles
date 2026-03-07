@@ -10,8 +10,10 @@ set_wallpaper() {
   safe_symlink "$wallpaper" "$CURRENT_BACKGROUND_LINK"
 
   hyprctl monitors -j | jq -r '.[].name' | while read -r monitor; do
-    hyprctl hyprpaper reload "$monitor,$CURRENT_BACKGROUND_LINK"
+    hyprctl hyprpaper preload "$wallpaper"
+    hyprctl hyprpaper wallpaper "$monitor,$wallpaper"
   done
+  hyprctl hyprpaper unload unused
   log_success "Wallpaper set: $(basename "$wallpaper")"
 }
 

@@ -46,6 +46,8 @@ source "$HOME/.local/share/dotfiles/bin/lib/helpers.sh"
   safe_symlink "$NEW_BACKGROUND" "$CURRENT_BACKGROUND_LINK"
 
   hyprctl monitors -j | jq -r '.[].name' | while read -r monitor; do
-    hyprctl hyprpaper reload "$monitor,$NEW_BACKGROUND"
+    hyprctl hyprpaper preload "$NEW_BACKGROUND"
+    hyprctl hyprpaper wallpaper "$monitor,$NEW_BACKGROUND"
   done
+  hyprctl hyprpaper unload unused
 fi

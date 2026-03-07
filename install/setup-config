@@ -32,7 +32,9 @@ for target in "${TARGETS[@]}"; do
 done
 
 cp -r "$DOTFILES_DIR/config/"* "$HOME/.config/"
-log_success "Config copied!"
+# Replace %HOME% placeholder in config files
+find "$HOME/.config" -type f -exec sed -i "s|%HOME%|$HOME|g" {} +
+log_success "Config copied and paths expanded!"
 
 echo "@import url(\"file://$HOME/.local/share/dotfiles/current/theme/gtk.css\");" >"$HOME/.config/gtk-3.0/gtk.css"
 echo "@import url(\"file://$HOME/.local/share/dotfiles/current/theme/gtk.css\");" >"$HOME/.config/gtk-4.0/gtk.css"
