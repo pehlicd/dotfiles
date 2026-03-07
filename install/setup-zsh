@@ -60,4 +60,16 @@ if [ -f "$HOME/.zshrc" ] || [ -L "$HOME/.zshrc" ]; then
 fi
 cp "$DOTFILES_DIR/default/.zshrc" "$HOME/.zshrc"
 
+log_info "Setting up .zprofile for UWSM autostart..."
+if [ -f "$HOME/.zprofile" ] || [ -L "$HOME/.zprofile" ]; then
+    if [ -e "$HOME/.zprofile" ]; then
+        backup_file "$HOME/.zprofile" || {
+            log_error "Failed to backup .zprofile"
+            exit 1
+        }
+    fi
+    remove_path "$HOME/.zprofile"
+fi
+cp "$DOTFILES_DIR/default/zshrc/zprofile" "$HOME/.zprofile"
+
 log_success "Zsh setup finished"

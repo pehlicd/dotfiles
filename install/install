@@ -167,7 +167,7 @@ gum confirm \
   --selected.background=2 \
   --affirmative="OK" \
   --negative="" \
-  "You have to pick Hyprland (uwsm-managed) in your login manager (like sddm, gdm, ly). Otherwise scripts will not be in PATH and will NOT WORK" || true
+  "Hyprland will automatically start via UWSM when you log into the TTY. You do not need a display manager." || true
 
 echo
 if ask_yes_no "Reboot now?"; then
