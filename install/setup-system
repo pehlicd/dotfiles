@@ -158,6 +158,12 @@ if is_installed "plymouth"; then
         sudo sed -i 's/HOOKS=(/HOOKS=(plymouth /' /etc/mkinitcpio.conf
       fi
     fi
+
+    # Ensure kms is early in hooks (required for Plymouth to show graphics)
+    if ! grep -q "kms" /etc/mkinitcpio.conf; then
+      sudo sed -i 's/HOOKS=(/HOOKS=(kms /' /etc/mkinitcpio.conf
+    fi
+
     sudo mkinitcpio -P
   fi
   
