@@ -3,7 +3,7 @@
 set -e
 
 # Source helper library
-source "$HOME/.local/bin/lib/helpers.sh"
+source "$HOME/.local/share/dotfiles/bin/lib/helpers.sh"
 
 # --- Hardware Checks ---
 
