@@ -1,5 +1,3 @@
-## ⚠️ Not maintained anymore as I moved to niri
-
 # Dotfiles for Hyprland on Arch Linux
 
 [![Arch Linux](https://img.shields.io/badge/Arch-Linux-1793D1?logo=arch-linux&logoColor=white)](https://archlinux.org/)
@@ -64,7 +62,7 @@ Quick info:
 ### Automatic installer
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Maciejonos/dotfiles/master/setup.sh | bash
+curl -fsSL https://raw.githubusercontent.com/pehlicd/dotfiles/master/setup.sh | bash
 ```
 
 **⚠️ Important Notes:**
@@ -236,6 +234,7 @@ The setup includes both static and dynamic theming:
 
 ## Credits
 
+- <https://github.com/Maciejonos/dotfiles>
 - <https://github.com/basecamp/omarchy>
 - <https://github.com/mylinuxforwork/dotfiles>
 - <https://github.com/elifouts/Dotfiles>
