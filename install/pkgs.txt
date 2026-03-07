@@ -96,6 +96,10 @@ bluez-utils
 bluetui
 networkmanager
 
+# Multi-Monitor
+nwg-displays
+wlr-randr
+
 # File Management & Desktop
 gvfs-dnssd
 loupe
