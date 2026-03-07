@@ -103,21 +103,60 @@ log_info "Enabling NetworkManager..."
 sudo systemctl enable NetworkManager
 log_success "NetworkManager enabled"
 
-# ly display manager configuration
-if is_installed "ly"; then
-  log_info "Configuring ly display manager..."
-  sudo mkdir -p /etc/systemd/system/ly.service.d
-  [ -f "/etc/systemd/system/ly.service.d/override.conf" ] && backup_file "/etc/systemd/system/ly.service.d/override.conf"
-  sudo cp "$DOTFILES_DIR/default/ly/override.conf" /etc/systemd/system/ly.service.d/override.conf
-  sudo systemctl daemon-reload
+# Display manager configuration (SDDM)
+if is_installed "sddm"; then
+  log_info "Configuring SDDM display manager..."
+  
+  # Disable ly if it was enabled
+  if systemctl is-enabled ly &>/dev/null; then
+    sudo systemctl disable ly
+  fi
 
-  [ -f "/etc/ly/config.ini" ] && backup_file "/etc/ly/config.ini"
-  sudo rm -f /etc/ly/config.ini
-  sudo cp "$DOTFILES_DIR/default/ly/config.ini" /etc/ly/config.ini
+  # Enable SDDM
+  sudo systemctl enable sddm
+  
+  # Set Sugar Candy theme
+  sudo mkdir -p /etc/sddm.conf.d
+  cat <<EOF | sudo tee /etc/sddm.conf.d/theme.conf >/dev/null
+[Theme]
+Current=sugar-candy
+EOF
+  log_success "SDDM configured and enabled"
+fi
 
-  log_success "ly display manager configured"
-else
-  log_detail "ly not installed, skipping"
+# Plymouth configuration
+if is_installed "plymouth"; then
+  log_info "Configuring Plymouth boot splash..."
+  
+  # Configure mkinitcpio hooks
+  if [ -f "/etc/mkinitcpio.conf" ]; then
+    backup_file "/etc/mkinitcpio.conf"
+    # Insert plymouth after keyboard/keymap and before encrypt/block
+    # We use a simple replacement if we find the standard hook list
+    if grep -q "HOOKS=(.*keyboard.*encrypt.*)" /etc/mkinitcpio.conf; then
+      sudo sed -i 's/keyboard /keyboard plymouth /' /etc/mkinitcpio.conf
+    elif grep -q "HOOKS=(.*block.*encrypt.*)" /etc/mkinitcpio.conf; then
+      sudo sed -i 's/block /block plymouth /' /etc/mkinitcpio.conf
+    else
+      log_detail "Manual mkinitcpio hook insertion failed, adding to the end (not ideal)"
+      sudo sed -i 's/HOOKS=(/HOOKS=(plymouth /' /etc/mkinitcpio.conf
+    fi
+    sudo mkinitcpio -P
+  fi
+  
+  # Configure GRUB
+  if [ -f "/etc/default/grub" ]; then
+    backup_file "/etc/default/grub"
+    if ! grep -q "splash" /etc/default/grub; then
+      sudo sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT="/GRUB_CMDLINE_LINUX_DEFAULT="quiet splash /' /etc/default/grub
+      sudo grub-mkconfig -o /boot/grub/grub.cfg
+    fi
+  fi
+  
+  # Set default theme to spinner (nice and clean)
+  sudo plymouth-set-default-theme -R spinner
+  
+  log_success "Plymouth configured"
 fi
 
 # Remove wait on network from system startup
