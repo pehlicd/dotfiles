@@ -55,3 +55,24 @@ EOF
 log_success "Config copied!"
 log_info "Backup saved to: $BACKUP_DIR"
 log_info "Restore instructions: cat $RESTORE_FILE"
+
+# Set default theme if none is set (first install)
+CURRENT_THEME_LINK="$HOME/.local/share/dotfiles/current/theme"
+CURRENT_BG_LINK="$HOME/.local/share/dotfiles/current/background"
+
+if [ ! -L "$CURRENT_THEME_LINK" ] || [ ! -e "$CURRENT_THEME_LINK" ]; then
+  log_info "Setting default theme (everforest)..."
+  mkdir -p "$(dirname "$CURRENT_THEME_LINK")"
+  
+  DEFAULT_THEME="$DOTFILES_DIR/themes/everforest"
+  if [ -d "$DEFAULT_THEME" ]; then
+    ln -snf "$DEFAULT_THEME" "$CURRENT_THEME_LINK"
+    
+    # Set the first wallpaper from the default theme
+    DEFAULT_BG=$(find -L "$DEFAULT_THEME/backgrounds" -type f 2>/dev/null | sort | head -n 1)
+    if [ -n "$DEFAULT_BG" ]; then
+      ln -snf "$DEFAULT_BG" "$CURRENT_BG_LINK"
+      log_success "Default wallpaper set: $(basename "$DEFAULT_BG")"
+    fi
+  fi
+fi
