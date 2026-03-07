@@ -19,20 +19,13 @@ done
 
 # ─── 2. Remove old theme directories ─────────────────────────────────────────
 
-# Sugar Candy
 sudo rm -rf /usr/share/sddm/themes/sugar-candy 2>/dev/null
-
-# adi1090x themes
 for theme_dir in /usr/share/plymouth/themes/abstract_ring /usr/share/plymouth/themes/vortex; do
   sudo rm -rf "$theme_dir" 2>/dev/null
 done
-
-# Old SDDM config pointing to sugar-candy
 if [ -f "/etc/sddm.conf.d/theme.conf" ]; then
   sudo rm -f /etc/sddm.conf.d/theme.conf
 fi
-
-# Old wallpaper sync directory (no longer needed with custom theme)
 sudo rm -rf /usr/share/backgrounds/dotfiles 2>/dev/null
 
 # ─── 3. Deploy custom Plymouth theme ─────────────────────────────────────────
@@ -43,36 +36,46 @@ sudo rm -rf /usr/share/plymouth/themes/dotfiles
 sudo cp -r "$DOTFILES_DIR/default/plymouth" /usr/share/plymouth/themes/dotfiles/
 sudo plymouth-set-default-theme dotfiles
 
-# Configure mkinitcpio hooks for Plymouth + LUKS
+# Fix mkinitcpio hooks — clean up duplicates and ensure plymouth is present once
 if [ -f "/etc/mkinitcpio.conf" ]; then
-  if ! grep -q "plymouth" /etc/mkinitcpio.conf; then
-    log_info "Adding plymouth hook to mkinitcpio.conf..."
-    sudo cp /etc/mkinitcpio.conf /etc/mkinitcpio.conf.bak
+  log_info "Fixing mkinitcpio hooks..."
+  sudo cp /etc/mkinitcpio.conf /etc/mkinitcpio.conf.bak
 
-    # Insert plymouth AFTER kms/keyboard and BEFORE encrypt
-    if grep -q "HOOKS=(.*keyboard.*encrypt.*)" /etc/mkinitcpio.conf; then
-      sudo sed -i 's/keyboard /keyboard plymouth /' /etc/mkinitcpio.conf
-    elif grep -q "HOOKS=(.*block.*encrypt.*)" /etc/mkinitcpio.conf; then
-      sudo sed -i 's/block /block plymouth /' /etc/mkinitcpio.conf
-    else
-      sudo sed -i 's/HOOKS=(/HOOKS=(plymouth /' /etc/mkinitcpio.conf
-    fi
+  # Remove ALL plymouth occurrences first, then add it back once in the right place
+  sudo sed -i 's/ plymouth//g' /etc/mkinitcpio.conf
+
+  # Insert plymouth ONCE after keyboard and before keymap/consolefont/block
+  if grep -q "HOOKS=.*keyboard.*encrypt" /etc/mkinitcpio.conf; then
+    sudo sed -i '/^HOOKS=/s/keyboard /keyboard plymouth /' /etc/mkinitcpio.conf
+  elif grep -q "HOOKS=.*block.*encrypt" /etc/mkinitcpio.conf; then
+    sudo sed -i '/^HOOKS=/s/block /block plymouth /' /etc/mkinitcpio.conf
+  else
+    sudo sed -i '/^HOOKS=/s/HOOKS=(/HOOKS=(plymouth /' /etc/mkinitcpio.conf
   fi
 
-  # Ensure kms is early in hooks (required for Plymouth to display graphics)
+  # Ensure kms is present for early GPU init
   if ! grep -q "kms" /etc/mkinitcpio.conf; then
-    log_info "Adding kms hook for early GPU init..."
-    sudo sed -i 's/HOOKS=(/HOOKS=(kms /' /etc/mkinitcpio.conf
+    sudo sed -i '/^HOOKS=/s/HOOKS=(/HOOKS=(kms /' /etc/mkinitcpio.conf
   fi
 
   log_info "Rebuilding initramfs..."
   sudo mkinitcpio -P
 fi
 
-# Configure GRUB for quiet splash boot
-if [ -f "/etc/default/grub" ]; then
+# Add 'quiet splash' to kernel cmdline for systemd-boot
+if [ -d "/boot/loader/entries" ]; then
+  log_info "Configuring systemd-boot for Plymouth..."
+  for entry in /boot/loader/entries/*.conf; do
+    if [ -f "$entry" ] && ! grep -q "splash" "$entry"; then
+      # Append 'quiet splash' to the options line
+      sudo sed -i '/^options/s/$/ quiet splash/' "$entry"
+      log_success "Added 'quiet splash' to $(basename "$entry")"
+    fi
+  done
+# Fallback for GRUB
+elif [ -f "/etc/default/grub" ]; then
   if ! grep -q "splash" /etc/default/grub; then
-    log_info "Adding 'quiet splash' to GRUB..."
+    log_info "Configuring GRUB for Plymouth..."
     sudo cp /etc/default/grub /etc/default/grub.bak
     sudo sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT="/GRUB_CMDLINE_LINUX_DEFAULT="quiet splash /' /etc/default/grub
     sudo grub-mkconfig -o /boot/grub/grub.cfg
