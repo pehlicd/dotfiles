@@ -34,25 +34,14 @@ generate-chrome-theme 2>/dev/null &
 
 # ── Restore wallpaper ────────────────────────────────────────────────────
 
-# Wait for hyprpaper to be ready (max 5 seconds)
-for i in $(seq 1 10); do
-  if pgrep -x hyprpaper &>/dev/null; then
-    break
-  fi
-  sleep 0.5
-done
-
 # Resolve the symlink to the actual wallpaper path
 if [ -L "$CURRENT_BG" ] && [ -e "$CURRENT_BG" ]; then
   WALLPAPER=$(readlink -f "$CURRENT_BG")
 
-  # Small delay to let hyprpaper finish initializing IPC
+  # Small delay to let Wayland compositor settle
   sleep 1
 
-  # Apply via IPC to all monitors
-  hyprctl hyprpaper preload "$WALLPAPER"
-  hyprctl monitors -j | jq -r '.[].name' | while read -r monitor; do
-    hyprctl hyprpaper wallpaper "$monitor,$WALLPAPER"
-  done
-  hyprctl hyprpaper unload unused
+  # Apply via swaybg
+  pkill -x swaybg
+  setsid uwsm-app -- swaybg -i "$WALLPAPER" -m fill >/dev/null 2>&1 &
 fi
