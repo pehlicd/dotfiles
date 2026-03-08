@@ -1,5 +1,5 @@
-@import "current/style.css";
 @import "../../.local/share/dotfiles/current/theme/waybar.css";
+@import "current/style.css";
 
 * {
     background-color: transparent;
