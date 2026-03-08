@@ -42,7 +42,7 @@
     // Modules Left
     "modules-left": [
         "clock",
-        "group/expand",
+        "group/expand"
     ],
     // Modules Center
     "modules-center": [

@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# Generates waybar.css for all themes based on colors.toml
+THEMES_DIR="$HOME/.local/share/dotfiles/themes"
+
+for theme in "$THEMES_DIR"/*; do
+  if [ -d "$theme" ] && [ -f "$theme/colors.toml" ]; then
+    # Extract foreground and background using awk avoiding bash sed issues
+    foreground=$(grep 'foreground = ' "$theme/colors.toml" | head -1 | cut -d '"' -f 2)
+    background=$(grep 'background = ' "$theme/colors.toml" | head -1 | cut -d '"' -f 2)
+
+    if [ -n "$foreground" ] && [ -n "$background" ]; then
+      echo -e "@define-color foreground $foreground;\n@define-color background $background;" > "$theme/waybar.css"
+      echo "Generated waybar.css for $(basename "$theme")"
+    fi
+  fi
+done
