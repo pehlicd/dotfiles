@@ -1,0 +1,70 @@
+#!/bin/bash
+source "$HOME/.local/share/dotfiles/bin/lib/helpers.sh"
+
+log_info "Detecting Limine configuration..."
+
+# 1. Locate the limine.conf file
+limine_config=""
+possible_paths=(
+    "/boot/EFI/arch-limine/limine.conf"
+    "/boot/EFI/BOOT/limine.conf"
+    "/boot/EFI/limine/limine.conf"
+    "/boot/limine/limine.conf"
+    "/boot/limine.conf"
+)
+
+for path in "${possible_paths[@]}"; do
+    if [[ -f "$path" ]]; then
+        limine_config="$path"
+        break
+    fi
+done
+
+if [[ -z "$limine_config" ]]; then
+    log_error "Could not find limine.conf in any standard boot directories!"
+    log_info "Please ensure Limine is installed correctly."
+    exit 1
+fi
+
+log_step "Found Limine config at: $limine_config"
+
+# 2. Determine necessary kernel parameters
+params_to_add="quiet splash"
+
+if has_nvidia_gpu; then
+    log_detail "NVIDIA GPU detected. Adding DRM modeset parameters."
+    params_to_add="$params_to_add nvidia_drm.modeset=1 nvidia_drm.fbdev=1"
+fi
+
+# 3. Inject parameters into the config
+log_step "Injecting kernel parameters..."
+
+# We use awk to safely parse the file and append to any 'cmdline:' or 'kernel_cmdline:' line
+# only if the parameters don't already exist.
+sudo awk -v params="$params_to_add" '
+{
+    if ($1 == "cmdline:" || $1 == "kernel_cmdline:" || $1 == "cmdline" || $1 == "kernel_cmdline") {
+        # Check which parameters are missing and append them
+        split(params, p, " ")
+        for (i in p) {
+            if ($0 !~ p[i]) {
+                $0 = $0 " " p[i]
+            }
+        }
+        print $0
+    } else {
+        print $0
+    }
+}' "$limine_config" > /tmp/limine.conf.new
+
+# 4. Replace the old config
+if [[ -s /tmp/limine.conf.new ]]; then
+    sudo mv /tmp/limine.conf.new "$limine_config"
+    sudo chmod 644 "$limine_config"
+    log_success "Successfully updated Limine boot parameters!"
+    log_info "Reboot your system to see Plymouth and SDDM working correctly."
+else
+    log_error "Failed to generate new Limine config."
+    rm -f /tmp/limine.conf.new
+    exit 1
+fi
