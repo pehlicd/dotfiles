@@ -58,6 +58,7 @@ satty
 slurp
 sunsetr
 swayosd
+swaybg
 tesseract
 tesseract-data-eng
 tinte
