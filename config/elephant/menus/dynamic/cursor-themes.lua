@@ -54,7 +54,7 @@ function GetEntries()
 						Subtext = comment ~= "" and comment or theme_name,
 						Value = theme_name,
 						Actions = {
-							apply = "hyprctl setcursor '"
+							activate = "hyprctl setcursor '"
 								.. theme_name
 								.. "' 24 && notify-send 'Cursor Theme' 'Set to "
 								.. display_name

@@ -32,30 +32,11 @@ function GetEntries()
 					return first:upper() .. rest
 				end)
 
-				local apply_cmd = ""
-
-				local style_check = io.open(line .. "/style.css", "r")
-				if style_check then
-					apply_cmd = apply_cmd .. "cat '" .. line .. "/style.css' > '" .. style_css .. "'; "
-					style_check:close()
-				end
-
-				local config_check = io.open(line .. "/config", "r")
-				if config_check then
-					apply_cmd = apply_cmd .. "cat '" .. line .. "/config' > '" .. config_file .. "'; "
-					config_check:close()
-				end
-
-				apply_cmd = apply_cmd
-					.. "restart-app waybar; notify-send 'Waybar Theme' 'Switched to "
-					.. display_name
-					.. "'"
-
 				table.insert(entries, {
 					Text = display_name,
 					Value = theme_name,
 					Actions = {
-						apply = apply_cmd,
+						activate = "waybar-theme '" .. theme_name .. "'",
 					},
 				})
 			end

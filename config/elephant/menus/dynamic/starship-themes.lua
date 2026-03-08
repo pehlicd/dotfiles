@@ -50,7 +50,7 @@ function GetEntries()
 					Value = config_name,
 					state = is_current and { "current" } or nil,
 					Actions = {
-						apply = "rm -f '"
+						activate = "rm -f '"
 							.. config_link
 							.. "' && ln -s '"
 							.. line
