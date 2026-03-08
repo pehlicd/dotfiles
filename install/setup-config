@@ -56,6 +56,12 @@ log_success "Config copied!"
 log_info "Backup saved to: $BACKUP_DIR"
 log_info "Restore instructions: cat $RESTORE_FILE"
 
+# Restart audio service to apply any new wireplumber configs (e.g. alsa-soft-mixer)
+if systemctl --user is-active --quiet wireplumber 2>/dev/null; then
+  log_info "Restarting wireplumber to apply audio configs..."
+  systemctl --user restart wireplumber 2>/dev/null || true
+fi
+
 # Set default theme if none is set (first install)
 CURRENT_THEME_LINK="$HOME/.local/share/dotfiles/current/theme"
 CURRENT_BG_LINK="$HOME/.local/share/dotfiles/current/background"
