@@ -1,0 +1,30 @@
+#!/bin/bash
+source "$HOME/.local/share/dotfiles/bin/lib/helpers.sh"
+
+if [[ -z $1 ]]; then
+  mapfile -t extra_themes < <(find "$HOME/.local/share/dotfiles/themes" -mindepth 1 -maxdepth 1 -type d ! -xtype l -printf '%f\n')
+
+  if (( ${#extra_themes[@]} > 0 )); then
+    THEME_NAME=$(printf '%s\n' "${extra_themes[@]}" | sort | gum choose --header="Remove extra theme")
+  else
+    echo "No themes installed."
+    exit 1
+  fi
+else
+  THEME_NAME="$1"
+fi
+
+THEMES_DIR="$HOME/.local/share/dotfiles/themes"
+THEME_PATH="$THEMES_DIR/$THEME_NAME"
+
+if [[ -z $THEME_NAME ]]; then
+  exit 1
+fi
+
+if [[ ! -d $THEME_PATH ]]; then
+  log_error "Error: Theme '$THEME_NAME' not found."
+  exit 1
+fi
+
+rm -rf "$THEME_PATH"
+log_success "Theme '$THEME_NAME' removed successfully."

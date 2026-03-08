@@ -1,0 +1,13 @@
+#!/bin/bash
+source "$HOME/.local/share/dotfiles/bin/lib/helpers.sh"
+
+log_step "Updating git-based themes"
+
+for dir in ~/.local/share/dotfiles/themes/*/; do
+  if [[ -d $dir ]] && [[ ! -L ${dir%/} ]] && [[ -d $dir/.git ]]; then
+    log_info "Updating: $(basename "$dir")"
+    git -C "$dir" pull
+  fi
+done
+
+log_success "Themes updated."

@@ -17,6 +17,17 @@ function GetEntries()
 		current_handle:close()
 	end
 
+	-- Add the TUI Theme Manager entry at the top
+	table.insert(entries, {
+		Text = "Manage Themes (TUI)",
+		Subtext = "Install, remove, or update extra community themes",
+		Value = "Manage Themes",
+		Actions = {
+			activate = "uwsm app -- ghostty -e theme-manager",
+		},
+	})
+
+
 	local handle = io.popen(
 		"find '" .. themes_dir .. "' -mindepth 1 -maxdepth 1 \\( -type d -o -type l \\) ! -name 'backgrounds' | sort"
 	)

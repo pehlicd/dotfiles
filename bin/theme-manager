@@ -1,0 +1,41 @@
+#!/bin/bash
+source "$HOME/.local/share/dotfiles/bin/lib/helpers.sh"
+
+show_menu() {
+    clear
+    echo -e "\e[1;36m┌──────────────────────────────────────────┐\e[0m"
+    echo -e "\e[1;36m│             THEME MANAGER                │\e[0m"
+    echo -e "\e[1;36m└──────────────────────────────────────────┘\e[0m"
+    echo ""
+    
+    ACTION=$(gum choose \
+        "Install Extra Theme" \
+        "Remove Extra Theme" \
+        "Update All Themes" \
+        "Exit" \
+        --header "Select an action:")
+
+    case "$ACTION" in
+        "Install Extra Theme")
+            clear
+            theme-install
+            ;;
+        "Remove Extra Theme")
+            clear
+            theme-remove
+            ;;
+        "Update All Themes")
+            clear
+            theme-update
+            ;;
+        "Exit")
+            clear
+            exit 0
+            ;;
+    esac
+
+    echo ""
+    gum confirm "Return to menu?" && show_menu || clear
+}
+
+show_menu

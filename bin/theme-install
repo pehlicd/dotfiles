@@ -1,0 +1,66 @@
+#!/bin/bash
+source "$HOME/.local/share/dotfiles/bin/lib/helpers.sh"
+
+if [[ -z $1 ]]; then
+  echo -e "\e[32mSee https://manuals.omamix.org/2/the-omarchy-manual/90/extra-themes\n\e[0m"
+  REPO_URL=$(gum input --placeholder="Git repo URL for theme" --header="Install Extra Theme")
+else
+  REPO_URL="$1"
+fi
+
+if [[ -z $REPO_URL ]]; then
+  exit 1
+fi
+
+THEMES_DIR="$HOME/.local/share/dotfiles/themes"
+THEME_NAME=$(basename "$REPO_URL" .git | sed -E 's/^omarchy-//; s/-theme$//')
+THEME_PATH="$THEMES_DIR/$THEME_NAME"
+
+# Remove existing theme if present
+if [[ -d $THEME_PATH ]]; then
+  log_info "Removing existing theme in $THEME_PATH..."
+  rm -rf "$THEME_PATH"
+fi
+
+# Clone the repo
+log_step "Installing theme: $THEME_NAME"
+if ! git clone "$REPO_URL" "$THEME_PATH"; then
+  log_error "Failed to clone theme repo."
+  exit 1
+fi
+
+# Ensure hyprland.conf exists so Hyprland doesn't crash on source
+if [[ ! -f "$THEME_PATH/hyprland.conf" ]]; then
+  touch "$THEME_PATH/hyprland.conf"
+fi
+
+# Pre-generate Waybar and Walker CSS safely based on colors.toml
+python3 - <<EOF
+import os
+
+theme_path = "$THEME_PATH"
+colors_file = os.path.join(theme_path, "colors.toml")
+
+if os.path.isfile(colors_file):
+    fg, bg, accent = None, None, None
+    with open(colors_file, 'r') as f:
+        for line in f:
+            parts = line.split("=")
+            if len(parts) == 2:
+                k = parts[0].strip()
+                v = parts[1].strip().strip('"')
+                if k == "foreground": fg = v
+                elif k == "background": bg = v
+                elif k == "accent": accent = v
+    
+    if fg and bg and not os.path.exists(os.path.join(theme_path, "waybar.css")):
+        with open(os.path.join(theme_path, "waybar.css"), "w") as out:
+            out.write(f"@define-color foreground {fg};\n@define-color background {bg};\n")
+            
+    if fg and bg and accent and not os.path.exists(os.path.join(theme_path, "walker.css")):
+        with open(os.path.join(theme_path, "walker.css"), "w") as out:
+            out.write(f"@define-color selected-text {accent};\n@define-color text {fg};\n@define-color base {bg};\n@define-color border {fg};\n@define-color foreground {fg};\n@define-color background {bg};\n")
+EOF
+
+# Apply the new theme
+theme-set "$THEME_NAME"
