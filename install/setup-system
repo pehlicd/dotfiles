@@ -115,11 +115,6 @@ log_success "NetworkManager enabled"
 if is_installed "sddm"; then
   log_info "Configuring SDDM display manager..."
   
-  # Disable ly if it was enabled
-  if systemctl is-enabled ly &>/dev/null; then
-    sudo systemctl disable ly
-  fi
-
   # Enable SDDM
   sudo systemctl enable sddm
   
@@ -195,8 +190,13 @@ if is_installed "plymouth"; then
 fi
 
 # Remove wait on network from system startup
+# Ensure iwd service will be started
+sudo systemctl enable iwd.service
+
+# Prevent systemd-networkd-wait-online timeout on boot
 log_info "Disabling systemd-networkd-wait-online.service..."
 sudo systemctl disable systemd-networkd-wait-online.service 2>/dev/null || true
+sudo systemctl mask systemd-networkd-wait-online.service 2>/dev/null || true
 
 # Enable ssh agent
 log_info "Enabling gcr-ssh-agent"
